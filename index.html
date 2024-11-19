@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24 MATH SOLVER</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url("file:///C:/Users/panay/Downloads/S__3506288.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            color: white;
+        }
+
+        header {
+            width: 100%;
+            padding: 30px;
+            background: rgb(26, 26, 26);
+            text-align: center;
+            font-size: 2rem;
+            color: white;
+            position: fixed;
+            top: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .container {
+            margin-top: 100px; /* เพื่อเลื่อนส่วนเนื้อหาให้ไม่ถูกซ้อนกับ Header */
+            text-align: center;
+            padding: 20px;
+            background: rgb(55, 52, 52);
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .spinner {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .number-slot {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background-color: #fff;
+            color: #333;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .players {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .player input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid white;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .player input:focus {
+            outline: none;
+            border-bottom: 2px solid #007bff;
+        }
+
+        .score {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .score button {
+            padding: 5px;
+            font-size: 0.8rem;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .score button:hover {
+            background-color: #0056b3;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .timer-container {
+            margin-top: 20px;
+        }
+
+        .timer-container input {
+            width: 50px;
+            text-align: center;
+        }
+
+        #Whint {
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        ➕➖ Welcome to 24 MATH SOLVER ✖️➗
+    </header>
+
+    <div class="container">
+        <h1>Random Number with Timer</h1>
+        <div class="spinner">
+            <div class="number-slot" id="slot1">0</div>
+            <div class="number-slot" id="slot2">0</div>
+            <div class="number-slot" id="slot3">0</div>
+            <div class="number-slot" id="slot4">0</div>
+        </div>
+        <button id="spinButton">Spin</button>
+        <div class="players" id="players"></div>
+        <button id="addPlayerButton">Add Player</button>
+        <div class="timer-container">
+            <label for="timerInput">Set Timer (seconds):</label>
+            <input type="number" id="timerInput" value="30" min="1" />
+            <button id="startTimerButton">Start Timer</button>
+            <p id="timerDisplay">Time left: 30s</p>
+        </div>
+    </div>
+
+    <script>
+        const playersContainer = document.getElementById('players');
+        const spinButton = document.getElementById('spinButton');
+        const addPlayerButton = document.getElementById('addPlayerButton');
+        const startTimerButton = document.getElementById('startTimerButton');
+        const timerInput = document.getElementById('timerInput');
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        let playerCount = 0;
+        let timerInterval = null;
+
+        spinButton.addEventListener('click', () => {
+            const slots = [
+                document.getElementById('slot1'),
+                document.getElementById('slot2'),
+                document.getElementById('slot3'),
+                document.getElementById('slot4')
+            ];
+
+            slots.forEach((slot) => {
+                slot.textContent = '-';
+                let counter = 0;
+                const interval = setInterval(() => {
+                    slot.textContent = Math.floor(Math.random() * 10); // สุ่มตัวเลข 0-9
+                    counter++;
+                    if (counter > 20) { // หมุน 20 ครั้งแล้วหยุด
+                        clearInterval(interval);
+                    }
+                }, 100);
+            });
+        });
+
+        addPlayerButton.addEventListener('click', () => {
+            playerCount++;
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player';
+            playerDiv.innerHTML = `
+                <input type="text" value="Player ${playerCount}" />
+                <div class="score">
+                    <button onclick="addScore(${playerCount}, 1)">+1</button>
+                    <button onclick="addScore(${playerCount}, -1)">-1</button>
+                    <span id="scoreValue${playerCount}">0</span>/5
+                </div>
+            `;
+            playersContainer.appendChild(playerDiv);
+        });
+
+        function addScore(playerId, change) {
+            const scoreSpan = document.getElementById(`scoreValue${playerId}`);
+            let currentScore = parseInt(scoreSpan.textContent);
+            currentScore = Math.max(0, Math.min(5, currentScore + change));
+            scoreSpan.textContent = currentScore;
+        }
+
+        startTimerButton.addEventListener('click', () => {
+            if (timerInterval) clearInterval(timerInterval);
+
+            let timeLeft = parseInt(timerInput.value);
+            timerDisplay.textContent = `Time left: ${timeLeft}s`;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `Time left: ${timeLeft}s`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up!');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+
+</html>
