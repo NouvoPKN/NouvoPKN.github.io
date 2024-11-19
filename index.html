@@ -15,9 +15,9 @@
             height: 100vh;
             margin: 0;
             background-image: url("https://raw.githubusercontent.com/NouvoPKN/NouvoPKN.github.io/91bc6b21398a5baeea753953e547581aaf2fdf04/S__3506288.jpg");
-            background-size: cover; /* ปรับให้ภาพเต็มหน้าจอ */
+            background-size: cover;
             background-repeat: no-repeat;
-            background-position: center; /* จัดตำแหน่งภาพที่กลาง */
+            background-position: center;
             color: white;
         }
 
@@ -35,7 +35,7 @@
         }
 
         .container {
-            margin-top: 100px; /* เพื่อเลื่อนส่วนเนื้อหาให้ไม่ถูกซ้อนกับ Header */
+            margin-top: 100px;
             text-align: center;
             padding: 20px;
             background: rgb(55, 52, 52);
@@ -150,6 +150,15 @@
         #Whint {
             color: #ffffff;
         }
+
+        .solution {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            display: none;
+        }
     </style>
 </head>
 
@@ -167,6 +176,9 @@
             <div class="number-slot" id="slot4">0</div>
         </div>
         <button id="spinButton">Spin</button>
+        <button id="revealButton" style="display:none;">Reveal Solution</button>
+        <div class="solution" id="solution"></div>
+
         <div class="players" id="players"></div>
         <button id="addPlayerButton">Add Player</button>
         <div class="timer-container">
@@ -184,11 +196,79 @@
         const startTimerButton = document.getElementById('startTimerButton');
         const timerInput = document.getElementById('timerInput');
         const timerDisplay = document.getElementById('timerDisplay');
+        const revealButton = document.getElementById('revealButton');
+        const solutionDiv = document.getElementById('solution');
 
         let playerCount = 0;
         let timerInterval = null;
+        let numbers = [];
 
+        // ฟังก์ชันสุ่มเลข 4 ตัว (แก้ไขให้ตัวเลขอยู่ระหว่าง 0 ถึง 9)
+        function generateNumbers() {
+            let num1, num2, num3, num4;
+            
+            // สุ่มเลข 4 ตัวระหว่าง 0 ถึง 9
+            num1 = Math.floor(Math.random() * 10);  // Random number between 0 and 9
+            num2 = Math.floor(Math.random() * 10);  // Random number between 0 and 9
+            num3 = Math.floor(Math.random() * 10);  // Random number between 0 and 9
+            num4 = Math.floor(Math.random() * 10);  // Random number between 0 and 9
+            
+            return [num1, num2, num3, num4];
+        }
+
+        // ฟังก์ชันตรวจสอบการคำนวณ
+        function checkSolution(nums) {
+            const operators = ['+', '-', '*', '/'];
+            const allPermutations = getPermutations(nums);
+            let solutionFound = false;
+            let solution = '';
+
+            for (let perm of allPermutations) {
+                for (let op1 of operators) {
+                    for (let op2 of operators) {
+                        for (let op3 of operators) {
+                            const expr = `(${perm[0]} ${op1} ${perm[1]}) ${op2} (${perm[2]} ${op3} ${perm[3]})`;
+                            try {
+                                if (eval(expr) === 24) {
+                                    solution = `Solution: (${perm[0]} ${op1} ${perm[1]}) ${op2} (${perm[2]} ${op3} ${perm[3]}) = 24`;
+                                    solutionFound = true;
+                                    break;
+                                }
+                            } catch (e) {
+                                continue;
+                            }
+                        }
+                    }
+                }
+                if (solutionFound) break;
+            }
+
+            if (solutionFound) {
+                solutionDiv.textContent = solution;
+                solutionDiv.style.display = 'block';
+            } else {
+                solutionDiv.textContent = 'No valid solution found. The puzzle might be unsolvable.';
+                solutionDiv.style.display = 'block';
+            }
+        }
+
+        // ฟังก์ชันหาลำดับการจัดเรียงตัวเลขทั้งหมด
+        function getPermutations(arr) {
+            if (arr.length === 1) return [arr];
+            const permutations = [];
+            for (let i = 0; i < arr.length; i++) {
+                const rest = arr.slice(0, i).concat(arr.slice(i + 1));
+                const subPerms = getPermutations(rest);
+                for (let perm of subPerms) {
+                    permutations.push([arr[i]].concat(perm));
+                }
+            }
+            return permutations;
+        }
+
+        // เมื่อคลิกปุ่ม Spin
         spinButton.addEventListener('click', () => {
+            numbers = generateNumbers();
             const slots = [
                 document.getElementById('slot1'),
                 document.getElementById('slot2'),
@@ -196,19 +276,29 @@
                 document.getElementById('slot4')
             ];
 
-            slots.forEach((slot) => {
-                slot.textContent = '-';
+            slots.forEach((slot, index) => {
                 let counter = 0;
+                slot.textContent = '-';
                 const interval = setInterval(() => {
-                    slot.textContent = Math.floor(Math.random() * 10); // สุ่มตัวเลข 0-9
+                    slot.textContent = Math.floor(Math.random() * 10); 
                     counter++;
-                    if (counter > 20) { // หมุน 20 ครั้งแล้วหยุด
+                    if (counter > 20) { 
                         clearInterval(interval);
+                        slot.textContent = numbers[index]; 
                     }
                 }, 100);
             });
+
+            revealButton.style.display = 'block'; 
+            solutionDiv.style.display = 'none'; 
         });
 
+        // เมื่อคลิกปุ่ม Reveal Solution
+        revealButton.addEventListener('click', () => {
+            checkSolution(numbers);
+        });
+
+        // เพิ่มผู้เล่น
         addPlayerButton.addEventListener('click', () => {
             playerCount++;
             const playerDiv = document.createElement('div');
@@ -231,6 +321,7 @@
             scoreSpan.textContent = currentScore;
         }
 
+        // เริ่มตัวจับเวลา
         startTimerButton.addEventListener('click', () => {
             if (timerInterval) clearInterval(timerInterval);
 
